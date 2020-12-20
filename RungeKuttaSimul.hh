@@ -51,7 +51,6 @@ void RungeKuttaSimul<N>::SetInitValues(double x, double* y){
     // std::valarray<double> y_init(y, N);
     std::valarray<double> y_init(N);
     for (int i = 0; i < N; ++i){
-        std::cout << *y << std::endl;
         y_init[i] = *y++;
     }
     y_.push_back(y_init);
