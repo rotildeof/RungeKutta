@@ -4,7 +4,6 @@
 #include <valarray>
 #include <array>
 #include <vector>
-#include <valarray>
 #include <functional>
 #include <algorithm>
 #include <iterator>
