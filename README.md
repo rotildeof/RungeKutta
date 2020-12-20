@@ -168,3 +168,7 @@ void WriteFile(std::string filename);
 これを実際にプロットすると次のようになる。x=1で切り替わっているのがわかる。
 
 <img src = "imag/ex1.png" width="300px">
+
+---
+
+[2]
