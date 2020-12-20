@@ -180,8 +180,8 @@ void WriteFile(std::string filename);
     RungeKutta<2> rk;
     double k = 10; // バネ定数 10 [N/m]
     double m = 0.1; // 質量 0.1 [kg]
-    double b = 2; // 摩擦の比例定数。 2.0 [Ns/m]
-    auto f1 = [&](double t, double* x){return -k / m * x[0] - b * x[1];}; // 方程式右辺
+    double b = 0.3; // 摩擦の比例定数。 0.3 [Ns/m]
+    auto f1 = [&](double t, double* x){return -k / m * x[0] - b / m * x[1];}; // 方程式右辺
     rk.AssignFunction(f1);
     double x[2] = { 1, 0 }; t=0 で 初期位置 x = 1 [m], 初期速度 v = 0 [m/s] だったとする。
     rk.SetInitValues(0, x);
