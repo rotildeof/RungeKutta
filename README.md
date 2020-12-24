@@ -64,7 +64,7 @@ RungeKuttaSimul\<N\>
 
 例として、x(t)とy(t)に関する連立微分方程式 x'(t)=-y(t) y'(t)=x(t) を初期条件x(0)=0, y(0)=1で解く場合を示す。(上記の連立微分方程式において、x -> t, y_0 -> x, y_1 -> y となっているので注意。あくまで、x(今の場合はt)は媒介変数と捉える。)
 ```c++
-#include "RungeKutta.hh"
+#include "RungeKuttaSimul.hh"
 
 int main(){
   RungeKuttaSimul<2> rk_simul; // 今は2元連立微分方程式を考えているので、テンプレートの引数は2
