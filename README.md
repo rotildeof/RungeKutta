@@ -72,7 +72,7 @@ int main(){
   auto f1 = [](double t, const double* x) {return x[0];}; // y'(t)=x(t)
   rk_simul.AssignFunction(0, f0); // 0番目の式の右辺における関数をセットする
   rk_simul.AssignFunction(1, f1); // 1番目の式の右辺における関数をセットする
-  rk_simul.SetInitValues(0, { 0, 1 }); // 初期値。t=0 で x(0)=0, y(0)=0 だったとする。
+  rk_simul.SetInitValues(0, { 0, 1 }); // 初期値。t=0 で x(0)=0, y(0)=1 だったとする。
   rk_simul.SetMaximumX(6.2); // tの最大値を6.2までに設定する。
   rk_simul.Solve(6.2); // t = 0 ~ 6.2 の範囲で微分方程式を解く。
 }
