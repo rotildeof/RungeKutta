@@ -62,7 +62,7 @@ double GetValueY(double i, double k);
 RungeKuttaSimul\<N\>
 --
 
-例として、x(t)とy(t)に関する連立微分方程式 x'(x)=-y(t) y'(t)=x(t) を初期条件x(0)=0, y(0)=1で解く場合を示す。(上記の連立微分方程式において、x -> t, y_0 -> x, y_1 -> y となっている。)
+例として、x(t)とy(t)に関する連立微分方程式 x'(t)=-y(t) y'(t)=x(t) を初期条件x(0)=0, y(0)=1で解く場合を示す。(上記の連立微分方程式において、x -> t, y_0 -> x, y_1 -> y となっているので注意。あくまで、x(今の場合はt)は媒介変数と捉える。)
 ```c++
 #include "RungeKutta.hh"
 
@@ -77,7 +77,8 @@ int main(){
   rk_simul.Solve(6.2); // t = 0 ~ 6.2 の範囲で微分方程式を解く。
 }
 ```
-
+tを0~6.2まで動かした時のx,yの値をプロットすると下図のようになる(縦軸がy, 横軸がx)。
+<img src = "imag/simul_dif_eq.png" width="300px">
 
 # メンバ関数
 
