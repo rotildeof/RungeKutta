@@ -5,10 +5,11 @@
 
 template <std::size_t N>
 class RungeKutta : public RungeKuttaSimul<N> {
+    using func_detail = std::function<double(double, const double*)>;
 public:
     RungeKutta();
     ~RungeKutta() {};
-    void AssignFunction(std::function<double(double, double*)> func);
+    void AssignFunction(func_detail func);
 };
 
 template <std::size_t N>
@@ -17,7 +18,7 @@ RungeKutta<N>::RungeKutta() {}
 template <std::size_t N>
 void RungeKutta<N>::AssignFunction(func_detail func) {
     for (int i = 0; i < N - 1; ++i) {
-        this->funcs[i] = [=](double x, double* y) {
+        this->funcs[i] = [=](double x, const double* y) {
             return y[i + 1];
         };
     }
