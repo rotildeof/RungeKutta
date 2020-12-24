@@ -4,7 +4,6 @@
 #include <valarray>
 #include <array>
 #include <vector>
-#include <valarray>
 #include <functional>
 #include <algorithm>
 #include <iterator>
@@ -12,18 +11,19 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
-
-using func_detail = std::function<double(double, double*)>;
+#include <initializer_list>
 
 template <std::size_t N>
 class RungeKuttaSimul {
+    using func_detail = std::function<double(double, const double*)>;
 public:
     RungeKuttaSimul();
     ~RungeKuttaSimul() {};
     void SetInitValues(double x, double* y);
+    void SetInitValues(double x, std::initializer_list<double> y);
     void SetStep(double step) { h = step; };
     void SetMaximumX(double x_max) { x_max_ = x_max;  is_max_set = true; };
-    void AssignFunction(int i_func, std::function<double(double, double*)> func);
+    void AssignFunction(int i_func, func_detail func);
     void Solve(double x_max);
     void WriteFile(const char* filename);
 
@@ -47,7 +47,7 @@ protected:
 template <std::size_t N>
 RungeKuttaSimul<N>::RungeKuttaSimul() {
     std::for_each(std::begin(k_), std::end(k_), [](std::valarray<double>& k) {k.resize(N);});
-    std::for_each(std::begin(y_), std::end(y_), [](std::valarray<double>& y) {y.resize(N);});
+    // std::for_each(std::begin(y_), std::end(y_), [](std::valarray<double>& y) {y.resize(N);});
 }
 
 template <std::size_t N>
@@ -56,6 +56,14 @@ void RungeKuttaSimul<N>::SetInitValues(double x, double* y) {
     x_min_ = x;
     is_min_set = true;
     y_.emplace_back(y, N);
+}
+
+template <std::size_t N>
+void RungeKuttaSimul<N>::SetInitValues(double x, std::initializer_list<double> y) {
+    x_.push_back(x);
+    x_min_ = x;
+    is_min_set = true;
+    y_.emplace_back(y);
 }
 
 template <std::size_t N>
@@ -87,21 +95,21 @@ void RungeKuttaSimul<N>::Solve(double x_max) {
     std::cout << "Number of repetition = " << rep << std::endl;
     for (int64_t i = i_now; i <= rep + i_now - 1; ++i) {
         std::transform(std::begin(funcs), std::end(funcs), std::begin(k_[0]),
-                       [&](func_detail f) {
+                       [&](func_detail& f) {
                            return h * f(x_[i - 1], &y_[i - 1][0]);
                        });
         std::transform(std::begin(funcs), std::end(funcs), std::begin(k_[1]),
-                       [&](func_detail f) {
+                       [&](func_detail& f) {
                            std::valarray<double> y_plus_k0_over2 = y_[i - 1] + k_[0] / 2;
                            return h * f(x_[i - 1] + h / 2, &y_plus_k0_over2[0]);
                        });
         std::transform(std::begin(funcs), std::end(funcs), std::begin(k_[2]),
-                       [&](func_detail f) {
+                       [&](func_detail& f) {
                            std::valarray<double> y_plus_k1_over2 = y_[i - 1] + k_[1] / 2;
                            return h * f(x_[i - 1] + h / 2, &y_plus_k1_over2[0]);
                        });
         std::transform(std::begin(funcs), std::end(funcs), std::begin(k_[3]),
-                       [&](func_detail f) {
+                       [&](func_detail& f) {
                            std::valarray<double> y_plus_k2 = y_[i - 1] + k_[2];
                            return h * f(x_[i - 1] + h, &y_plus_k2[0]);
                        });
@@ -123,6 +131,5 @@ void RungeKuttaSimul<N>::WriteFile(const char* filename) {
         }
         ofile << "\n";
     }
-    ofile << std::flush;
 }
 #endif
