@@ -23,6 +23,8 @@ class RungeKutta;
 　
 # 基本的な使い方
 
+RungeKutta\<N\>
+--
 例えば２階常微分方程式 y''= -y を初期値 y(0)=0, y'(0)=1で解きたい場合、
 
 ```c++
@@ -45,7 +47,6 @@ int main(){
 }
 
 ```
- 
 因みにこの結果をプロットすると、以下のようにsinカーブとなる。  
 <img src = "imag/sin_curve.png" width="300px">
 
@@ -57,6 +58,25 @@ double GetValueY(double i, double k);
 ```
 
 詳細はメンバ関数の項を参照。
+
+RungeKuttaSimul\<N\>
+--
+
+例として、x(t)とy(t)に関する連立微分方程式 x'(x)=-y(t) y'(t)=x(t) を初期条件x(0)=0, y(0)=1で解く場合を示す。(上記の連立微分方程式において、x -> t, y_0 -> x, y_1 -> y となっている。)
+```c++
+#include "RungeKutta.hh"
+
+int main(){
+  RungeKuttaSimul<2> rk_simul; // 今は2元連立微分方程式を考えているので、テンプレートの引数は2
+  auto f0 = [](double t, const double* x) {return -x[1];}; // x'(t)=-y(t)
+  auto f1 = [](double t, const double* x) {return x[0];}; // y'(t)=x(t)
+  rk_simul.AssignFunction(0, f0); // 0番目の式の右辺における関数をセットする
+  rk_simul.AssignFunction(1, f1); // 1番目の式の右辺における関数をセットする
+  rk_simul.SetInitValues(0, { 0, 1 }); // 初期値。t=0 で x(0)=0, y(0)=0 だったとする。
+  rk_simul.SetMaximumX(6.2); // tの最大値を6.2までに設定する。
+  rk_simul.Solve(6.2); // t = 0 ~ 6.2 の範囲で微分方程式を解く。
+}
+```
 
 
 # メンバ関数
