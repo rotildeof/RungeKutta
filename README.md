@@ -19,8 +19,8 @@ class RungeKutta;
 
 <img src = "imag/n階微分方程式.png" width="240px">
 
-を解くためのクラス。後者は前者を継承している。おそらくRungeKuttaの方をよく使うと思う。ここでは、クラスRungeKuttaの使い方の方を解説する。
-　
+を解くためのクラス。後者は前者を継承している。おそらくRungeKuttaの方をよく使うと思う。
+
 # 基本的な使い方
 
 RungeKutta\<N\>
@@ -82,6 +82,8 @@ tを0~6.2まで動かした時のx,yの値をプロットすると下図のよ�
 
 <img src = "imag/simul_dif_eq1.png" width="300px">
 
+ちなみに、連立方程式の中に二階以上の微分が含まれている場合も、1階の連立微分方程式に帰着できる。例えば、y''=-yという式があったとしても、新しく z = y' とすれば z' = -y, y' = z の二つの1階連立微分方程式に分解できる。(実はRungeKuttaクラスは1階の連立微分方程式に帰着させて解いているだけである。)
+
 # メンバ関数
 
 ```c++
@@ -127,21 +129,24 @@ x の定義域の最大値を設定する。(内部的にはこの関数を呼�
 ---
 
 ```c++
-void AssignFunction(std::function<double(double, const double*)> func);
+void AssignFunction(std::function<double(double, const double*)> func); // (1) RungeKutta 用
+void AssignFunction(int i_func, std::function<double(double, const double*)> func); // (2) RungeKuttaSimul 用
 ```
 
-微分方程式 y^(n)=f(x,y,y',...y^(n-1)) の右辺 f をセットする。fの形は引数の型を見ればわかるように、double function(double x, const double* y) の形でなければならない。例えば、f = x - y + y' - y'' の場合は、
+(1) 微分方程式 y^(n)=f(x,y,y',...y^(n-1)) の右辺 f をセットする。fの形は引数の型を見ればわかるように、`double function(double x, const double* y)` の形でなければならない。例えば、f = x - y + y' - y'' の場合は、
 ```c++
 double func(double x, const double *y){
   return x - y[0] + y[1] - y[2]; 
 }
 ```
-
-のように定義する。y[i]はyの i 階微分の項である。因みに、この関数は
+のように定義する。y[i]はyの i 階微分の項である。  
+(2)連立微分方程式を解く時に使う関数。`i_func` は y_i' = f_i(x,y_0,...y_n) の f_i に対応する。y[i]はそのままy_iに対応する。例えば、f_i = x - y_0 - y_1 のときは、
 ```c++
-void AssignFunction(int i_func, std::function<double(double, const double*)> func);
+double func(double x, const double *y){
+  return x - y[0] - y[1];
+}
 ```
-という定義も存在するが、これは連立微分方程式を解く時に使う関数。(これも元気な時に解説する。)
+のように定義する。
 
 ---
 
@@ -175,7 +180,7 @@ double GetValueY(double i, double k);
 void WriteFile(const char* filename);
 ```
 
-微分方程式の解をファイルに書き込む。引数にファイル名を指定する。フォーマットは x y y' y'' ... という風になっている。
+微分方程式の解をファイルに書き込む。引数にファイル名を指定する。フォーマットは x y y' y'' ... という風になっている。RungeKuttaSimulの場合は x y_0 y_1 ... となる。
 
 # 色々な使い方
 
