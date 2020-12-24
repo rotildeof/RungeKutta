@@ -30,10 +30,10 @@ class RungeKutta;
 
 int main(){
   RungeKutta<2> rk; // 2階微分方程式を解きたいので、テンプレートの引数には2を入れる。
-  auto f = [](double x, double *y){
+  auto f = [](double x, const double *y){
     return -y[0];
   };
-  // 必ず関数は double hogehoge(double x, double* y) の形にする。y[i]は yの i 階微分の意味。
+  // 必ず関数は double hogehoge(double x, const double* y) の形にする。y[i]は yの i 階微分の意味。
   // 今は、f(x, y, y') = -y なので、このようになる。
   rk.AssignFunction(f); // 関数を Assign する。
   double y[2] = {0, 1}; // 初期値。第一引数から順に、y, y' の初期値を入れる。x は次で入れる。
@@ -52,8 +52,8 @@ int main(){
 解が入っている配列にアクセスするために、以下のような関数が用意されてある。
 
 ```c++
-double GetValueX(double const& i);
-double GetValueY(double const& i, double const& k);
+double GetValueX(double i);
+double GetValueY(double i, double k);
 ```
 
 詳細はメンバ関数の項を参照。
@@ -74,14 +74,22 @@ RungeKutta();
 
 ```c++
 void SetInitValues(double x, double* y);
+void SetInitValues(double x, std::initializer_list<double> y);
 ```
 
-初期値を設定する。第一引数は x の初期値。第二引数に y, y', ... y^(n-1) (y^(i)はyの i 階微分)の初期値を配列の先頭ポインタとして渡す。
+初期値を設定する。第一引数は x の初期値。第二引数に y, y', ... y^(n-1) (y^(i)はyの i 階微分)の初期値を配列の先頭ポインタ、もしくは初期化子リストとして渡す。
+```c++
+// 例
+RungeKutta<3> rk;
+double y[3] = {0, 1, 0};
+rk.SetInitValues(0, y); // x = 0 で y = 0, y' = 1, y'' = 0の意味
+// rk.SetInitValues(0, {0, 1, 0}); としても可。
+```
 
 ---
 
 ```c++
-void SetStep(double const& step);
+void SetStep(double step);
 ```
 xの刻み幅を変える。初期値は0.001となっている。
 
@@ -96,26 +104,26 @@ x の定義域の最大値を設定する。(内部的にはこの関数を呼�
 ---
 
 ```c++
-void AssignFunction(std::function<double(double, double*)> func);
+void AssignFunction(std::function<double(double, const double*)> func);
 ```
 
-微分方程式 y^(n)=f(x,y,y',...y^(n-1)) の右辺 f をセットする。fの形は引数の型を見ればわかるように、double function(double x, double* y) の形でなければならない。例えば、f = x - y + y' - y'' の場合は、
+微分方程式 y^(n)=f(x,y,y',...y^(n-1)) の右辺 f をセットする。fの形は引数の型を見ればわかるように、double function(double x, const double* y) の形でなければならない。例えば、f = x - y + y' - y'' の場合は、
 ```c++
-double func(double x, double *y){
+double func(double x, const double *y){
   return x - y[0] + y[1] - y[2]; 
 }
 ```
 
 のように定義する。y[i]はyの i 階微分の項である。因みに、この関数は
 ```c++
-void AssignFunction(int i_func, std::function<double(double, double*)> func);
+void AssignFunction(int i_func, std::function<double(double, const double*)> func);
 ```
 という定義も存在するが、これは連立微分方程式を解く時に使う関数。(これも元気な時に解説する。)
 
 ---
 
 ```c++
-void Solve(double const& x_max);
+void Solve(double x_max);
 ```
 
 微分方程式を x = x_max までの範囲で解く。この関数が実行された後はクラス内に解が入った配列が生成される。
@@ -131,17 +139,17 @@ int64_t GetSize();
 ---
 
 ```c++
-double GetValueX(double const& i);
-double GetValueY(double const& i, double const& k);
+double GetValueX(double i);
+double GetValueY(double i, double k);
 ```
 
-(GetValueX) : 解の配列のうち、x のi番目の値を取得する。0.001 刻みでx=0~5まで解いた場合、i=0 -> x=0, i=1 -> x=0.001,... という構造になっている。  
+(GetValueX) : 解の配列のうち、x のi番目の値を取得する。0.001 刻みでx=0~5まで解いた場合、i=0 -> x=0, i=1 -> x=0.001,..., i=5000 -> x=5.000, という構造になっている。  
 (GetValueY) : 解の配列のうち、y^(k) のi番目の値を取得する。k は y の k 階微分を意味する。(0 <= k < N)
 
 ---
 
 ```c++
-void WriteFile(std::string filename);
+void WriteFile(const char* filename);
 ```
 
 微分方程式の解をファイルに書き込む。引数にファイル名を指定する。フォーマットは x y y' y'' ... という風になっている。
@@ -155,8 +163,8 @@ void WriteFile(std::string filename);
 ```c++
   // includeなどは適宜補完してください。
   RungeKutta<2> rk;
-  auto f1 = [](double x, double* y){return 1;};
-  auto f2 = [](double x, double* y){return -1;}; //２つ用意しておく
+  auto f1 = [](double x, const double* y){return 1;};
+  auto f2 = [](double x, const double* y){return -1;}; //２つ用意しておく
   rk.AssignFunction(f1); // f1の方をセットする。
   double y[2] = { 0, 0 }; // 初期値
   rk.SetInitValues(0, y); // 初期値のセット
@@ -181,10 +189,10 @@ void WriteFile(std::string filename);
     double k = 10; // バネ定数 10 [N/m]
     double m = 0.1; // 質量 0.1 [kg]
     double b = 0.3; // 摩擦の比例定数。 0.3 [Ns/m]
-    auto f1 = [&](double t, double* x){return -k / m * x[0] - b / m * x[1];}; // 方程式右辺
+    auto f1 = [&](double t, const double* x){return -k / m * x[0] - b / m * x[1];}; // 方程式右辺
     rk.AssignFunction(f1);
-    double x[2] = { 1, 0 }; // t=0 で 初期位置 x = 1 [m], 初期速度 v = 0 [m/s] だったとする。
-    rk.SetInitValues(0, x);
+    rk.SetMaximumX(3);
+    rk.SetInitValues(0, { 1, 0 });  // t=0 で 初期位置 x = 1 [m], 初期速度 v = 0 [m/s] だったとする。
     rk.Solve(3); // 3秒先の時間発展を見る。
 ```
 
