@@ -140,7 +140,7 @@ double func(double x, const double *y){
 }
 ```
 のように定義する。y[i]はyの i 階微分の項である。  
-(2)連立微分方程式を解く時に使う関数。`i_func` は y_i' = f_i(x,y_0,...y_n) の f_i に対応する。y[i]はそのままy_iに対応する。例えば、f_i = x - y_0 - y_1 のときは、
+(2) 連立微分方程式を解く時に使う関数。`i_func` は y_i' = f_i(x,y_0,...y_n) の f_i に対応する。y[i]はそのままy_iに対応する。例えば、f_i = x - y_0 - y_1 のときは、
 ```c++
 double func(double x, const double *y){
   return x - y[0] - y[1];
@@ -228,3 +228,38 @@ void WriteFile(const char* filename);
 
 <img src = "imag/ex2.png" width="300px">
 
+---
+
+[3]
+最も簡単な感染症モデルとしてSIRモデルと呼ばれるものがある。このモデルは感染症の流行を定量的に分析・予測するために使われるもので、以下の3元連立微分方程式で記述される。
+
+<img src = "imag/SIR_model.png" witdh="100px">
+
+ここで、S(t)は時刻 t における感受性保持者(簡単に言えばまだ感染していない人)、I(t)は感染者数、R(t)は免疫保持者(あるいは隔離者)である(Wikipedia "SIRモデル", "https://ja.wikipedia.org/wiki/SIRモデル", 2020/12/24 引用)。パラメータ β, γはそれぞれ感染率と回復率と呼ばれる。このモデルにおいて重要(だと思われる)なパラメータは、R0=S(0)β/γ で定義される基本再生産数という量で、感染者の1人がまだ感染していない人に対して平均何人感染させるているかを表す量である。  
+この微分方程式を、初期条件 S(0)=999, I(0)=1, R(0)=0 で解く。
+
+```c++
+    RungeKuttaSimul<3> rk_simul;
+    double beta = 0.0003; // β
+    double gamma = 0.1; // γ
+    auto S = [&](double t, const double* T) {return -beta * T[0] * T[1];};  
+    auto I = [&](double t, const double* T) {return beta * T[0] * T[1] - gamma * T[1];};
+    auto R = [&](double t, const double* T) {return gamma * T[1];};
+    // S, I, Rを代表させてTと書いてある。今の場合は T[0]=S, T[1]=I, T[2]=R
+    rk_simul.AssignFunction(0, S);
+    rk_simul.AssignFunction(1, I);
+    rk_simul.AssignFunction(2, R);
+    rk_simul.SetInitValues(0, { 999, 1, 0 }); // 初期値。S(0)=999, I(0)=1, R(0)=0。今の場合、基本再生産数 R0 ~ 3である。
+    rk_simul.SetMaximumX(100);
+    rk_simul.Solve(100);
+```
+
+上のコードで解いたとき(R0 ~ 3)の、S(赤), I(黄緑), R(青) の時間発展の様子は下図のようになる。
+
+<img src = "imag/SIR_3.png" width="300px">
+
+また、β = 0.002, γ = 0.1 (R0 ~ 2)の時で解いた時のグラフは下図になる。
+
+<img src = "imag/SIR_2.png" width="300px">
+
+基本再生産数 R0 ~ 3の場合は、短期で感染が拡大して結果的に約 94% の人が感染している。一方、R0 ~ 2の場合では比較的ゆるやかに感染者が増え、感染者数も80%(それでも8割...)に抑えられており、ピークも遅くなっている。このような傾向はR0に対して敏感であるようだ。単純なモデルではあるが、R0を小さくすること、すなわちできる限り人と接触しないというのは、感染拡大を防ぐ上で重要であることがわかる。
