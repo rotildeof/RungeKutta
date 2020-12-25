@@ -171,8 +171,8 @@ double GetValueX(double i);
 double GetValueY(double i, double k);
 ```
 
-(GetValueX) : 解の配列のうち、x のi番目の値を取得する。0.001 刻みでx=0~5まで解いた場合、i=0 -> x=0, i=1 -> x=0.001,..., i=5000 -> x=5.000, という構造になっている。  
-(GetValueY) : 解の配列のうち、y^(k) のi番目の値を取得する。k は y の k 階微分を意味する。(0 <= k < N)
+(GetValueX) : 解の配列のうち、x のi番目の値を返す。0.001 刻みでx=0~5まで解いた場合、i=0 -> x=0, i=1 -> x=0.001,..., i=5000 -> x=5.000, という構造になっている。  
+(GetValueY) : 解の配列のうち、y^(k) のi番目の値を返す。k は y の k 階微分を意味する (0 <= k < N) 。RungeKuttaSimulの場合は y_k' の i 番目の値を返す。
 
 ---
 
@@ -217,7 +217,7 @@ void WriteFile(const char* filename);
     double k = 10; // バネ定数 10 [N/m]
     double m = 0.1; // 質量 0.1 [kg]
     double b = 0.3; // 摩擦の比例定数。 0.3 [Ns/m]
-    auto f1 = [&](double t, const double* x){return -k / m * x[0] - b / m * x[1];}; // 方程式右辺
+    auto f1 = [=](double t, const double* x){return -k / m * x[0] - b / m * x[1];}; // 方程式右辺
     rk.AssignFunction(f1);
     rk.SetMaximumX(3);
     rk.SetInitValues(0, { 1, 0 });  // t=0 で 初期位置 x = 1 [m], 初期速度 v = 0 [m/s] だったとする。
@@ -242,9 +242,9 @@ void WriteFile(const char* filename);
     RungeKuttaSimul<3> rk_simul;
     double beta = 0.0003; // β
     double gamma = 0.1; // γ
-    auto S = [&](double t, const double* T) {return -beta * T[0] * T[1];};  
-    auto I = [&](double t, const double* T) {return beta * T[0] * T[1] - gamma * T[1];};
-    auto R = [&](double t, const double* T) {return gamma * T[1];};
+    auto S = [=](double t, const double* T) {return -beta * T[0] * T[1];};  
+    auto I = [=](double t, const double* T) {return beta * T[0] * T[1] - gamma * T[1];};
+    auto R = [=](double t, const double* T) {return gamma * T[1];};
     // S, I, Rを代表させてTと書いてある。今の場合は T[0]=S, T[1]=I, T[2]=R
     rk_simul.AssignFunction(0, S);
     rk_simul.AssignFunction(1, I);
